@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { profileRoutes } from "./routes/profileRoutes.js";
+import { budgetRoutes } from "./routes/budgetRoutes.js";
 
 export function buildApp() {
   const app = Fastify();
@@ -16,6 +17,7 @@ export function buildApp() {
   });
 
   app.register(profileRoutes);
+  app.register(budgetRoutes);
 
   return app;
 }

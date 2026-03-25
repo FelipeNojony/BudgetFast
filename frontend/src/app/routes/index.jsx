@@ -5,6 +5,8 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import DashboardPage from "../pages/DashboardPage";
 import ProfilePage from "../pages/ProfilePage";
+import NewBudgetPage from "../pages/NewBudgetPage";
+import BudgetsPage from "../pages/BudgetsPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -33,6 +35,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <ProfilePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/orcamentos",
+    element: (
+      <ProtectedRoute>
+        <BudgetsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/orcamentos/novo",
+    element: (
+      <ProtectedRoute>
+        <NewBudgetPage />
       </ProtectedRoute>
     ),
   },

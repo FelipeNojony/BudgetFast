@@ -33,7 +33,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Link
             to="/perfil"
             className="rounded-2xl border border-slate-800 bg-slate-900 p-6 hover:border-slate-700 transition"
@@ -44,12 +44,25 @@ export default function DashboardPage() {
             </p>
           </Link>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold mb-2">Próxima etapa</h2>
+          <Link
+            to="/orcamentos"
+            className="rounded-2xl border border-slate-800 bg-slate-900 p-6 hover:border-slate-700 transition"
+          >
+            <h2 className="text-xl font-semibold mb-2">Orçamentos</h2>
             <p className="text-slate-400">
-              Depois do perfil, vamos começar a criação dos orçamentos.
+              Visualize todos os orçamentos já criados.
             </p>
-          </div>
+          </Link>
+
+          <Link
+            to="/orcamentos/novo"
+            className="rounded-2xl border border-slate-800 bg-slate-900 p-6 hover:border-slate-700 transition"
+          >
+            <h2 className="text-xl font-semibold mb-2">Novo orçamento</h2>
+            <p className="text-slate-400">
+              Crie um novo orçamento com vários itens.
+            </p>
+          </Link>
         </div>
       </div>
     </main>
