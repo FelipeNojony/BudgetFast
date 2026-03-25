@@ -69,3 +69,57 @@ export async function getBudgetById(id) {
 
   return response.json();
 }
+
+export async function updateBudget(id, budgetData) {
+  const token = await getAccessToken();
+
+  const response = await fetch(`${API_URL}/budgets/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(budgetData),
+  });
+
+  if (!response.ok) {
+    let errorMessage = "Erro ao atualizar orçamento.";
+
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      errorMessage = `Erro ${response.status} ao atualizar orçamento.`;
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+export async function deleteBudget(id) {
+  const token = await getAccessToken();
+
+  const response = await fetch(`${API_URL}/budgets/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    let errorMessage = "Erro ao excluir orçamento.";
+
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      errorMessage = `Erro ${response.status} ao excluir orçamento.`;
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}

@@ -79,6 +79,7 @@ export default function BudgetsPage() {
                   <th className="px-4 py-4">Data</th>
                   <th className="px-4 py-4">Status</th>
                   <th className="px-4 py-4">Total</th>
+                  <th className="px-4 py-4">Ações</th>
                 </tr>
               </thead>
 
@@ -91,7 +92,17 @@ export default function BudgetsPage() {
                     <td className="px-4 py-4">
                       {budget.status === "finalized" ? "Finalizado" : "Rascunho"}
                     </td>
-                    <td className="px-4 py-4">R$ {Number(budget.total).toFixed(2)}</td>
+                    <td className="px-4 py-4">
+                      R$ {Number(budget.total).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-4">
+                      <Link
+                        to={`/orcamentos/${budget.id}`}
+                        className="text-white hover:underline"
+                      >
+                        Ver detalhes
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -7,6 +7,8 @@ import DashboardPage from "../pages/DashboardPage";
 import ProfilePage from "../pages/ProfilePage";
 import NewBudgetPage from "../pages/NewBudgetPage";
 import BudgetsPage from "../pages/BudgetsPage";
+import BudgetDetailsPage from "../pages/BudgetDetailsPage";
+import EditBudgetPage from "../pages/EditBudgetPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -51,6 +53,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <NewBudgetPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/orcamentos/:id",
+    element: (
+      <ProtectedRoute>
+        <BudgetDetailsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/orcamentos/:id/editar",
+    element: (
+      <ProtectedRoute>
+        <EditBudgetPage />
       </ProtectedRoute>
     ),
   },
