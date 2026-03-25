@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { deleteBudget, getBudgetById } from "../services/budgets";
+import {
+  deleteBudget,
+  getBudgetById,
+  downloadBudgetPdf,
+} from "../services/budgets";
 
 export default function BudgetDetailsPage() {
   const { id } = useParams();
@@ -10,6 +14,7 @@ export default function BudgetDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     async function loadBudget() {
@@ -41,6 +46,18 @@ export default function BudgetDetailsPage() {
       setDeleting(false);
     }
   }
+
+  async function handleDownloadPdf() {
+  try {
+    setDownloading(true);
+    setErrorMessage("");
+    await downloadBudgetPdf(id);
+  } catch (error) {
+    setErrorMessage(error.message);
+  } finally {
+    setDownloading(false);
+  }
+}
 
   if (loading) {
     return (
@@ -75,6 +92,14 @@ export default function BudgetDetailsPage() {
               Voltar
             </Link>
 
+            <button
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="rounded-xl border border-slate-700 px-5 py-3 font-semibold hover:bg-slate-900 transition disabled:opacity-50"
+            >
+              {downloading ? "Gerando PDF..." : "Baixar PDF"}
+            </button>
+            
             <Link
               to={`/orcamentos/${budget.id}/editar`}
               className="rounded-xl bg-white text-slate-950 px-5 py-3 font-semibold hover:opacity-90 transition"
@@ -89,6 +114,7 @@ export default function BudgetDetailsPage() {
             >
               {deleting ? "Excluindo..." : "Excluir"}
             </button>
+            
           </div>
         </div>
 

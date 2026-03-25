@@ -6,6 +6,8 @@ import {
   deleteBudgetByIdAndUserId,
 } from "../services/budgetService.js";
 import { calculateBudgetTotals } from "../utils/budgetCalculations.js";
+import { getProfileByUserId } from "../services/profileService.js";
+import { generateBudgetPdf } from "../services/pdfService.js";
 
 function generateBudgetNumber() {
   const timestamp = Date.now().toString().slice(-6);
@@ -199,6 +201,8 @@ export async function updateBudget(request, reply) {
   }
 }
 
+
+
 export async function deleteBudget(request, reply) {
   try {
     const userId = request.user.id;
@@ -212,6 +216,33 @@ export async function deleteBudget(request, reply) {
   } catch (error) {
     return reply.status(500).send({
       message: "Erro ao excluir orçamento.",
+      error: error.message,
+    });
+  }
+}
+
+export async function downloadBudgetPdf(request, reply) {
+  try {
+    const userId = request.user.id;
+    const { id } = request.params;
+
+    const [profile, budget] = await Promise.all([
+      getProfileByUserId(userId),
+      getBudgetByIdAndUserId(id, userId),
+    ]);
+
+    const pdfBuffer = await generateBudgetPdf(profile, budget);
+
+    reply
+      .header("Content-Type", "application/pdf")
+      .header(
+        "Content-Disposition",
+        `attachment; filename="${budget.budget_number}.pdf"`
+      )
+      .send(pdfBuffer);
+  } catch (error) {
+    return reply.status(500).send({
+      message: "Erro ao gerar PDF do orçamento.",
       error: error.message,
     });
   }
