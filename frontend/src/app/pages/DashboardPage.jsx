@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function DashboardPage() {
@@ -33,14 +33,23 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-xl font-semibold mb-2">
-            Sprint 2 concluída quase lá
-          </h2>
-          <p className="text-slate-400">
-            Seu sistema já possui autenticação com Supabase, persistência de
-            sessão e rota protegida.
-          </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Link
+            to="/perfil"
+            className="rounded-2xl border border-slate-800 bg-slate-900 p-6 hover:border-slate-700 transition"
+          >
+            <h2 className="text-xl font-semibold mb-2">Perfil profissional</h2>
+            <p className="text-slate-400">
+              Configure os dados que aparecerão nos seus orçamentos.
+            </p>
+          </Link>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold mb-2">Próxima etapa</h2>
+            <p className="text-slate-400">
+              Depois do perfil, vamos começar a criação dos orçamentos.
+            </p>
+          </div>
         </div>
       </div>
     </main>
