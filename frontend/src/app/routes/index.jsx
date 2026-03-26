@@ -10,6 +10,7 @@ import BudgetsPage from "../pages/BudgetsPage";
 import BudgetDetailsPage from "../pages/BudgetDetailsPage";
 import EditBudgetPage from "../pages/EditBudgetPage";
 import ProtectedRoute from "./ProtectedRoute";
+import AppLayout from "../components/layout/AppLayout";
 
 export const router = createBrowserRouter([
   {
@@ -24,52 +25,20 @@ export const router = createBrowserRouter([
     path: "/cadastro",
     element: <RegisterPage />,
   },
+
   {
-    path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <DashboardPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/perfil",
-    element: (
-      <ProtectedRoute>
-        <ProfilePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/orcamentos",
-    element: (
-      <ProtectedRoute>
-        <BudgetsPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/orcamentos/novo",
-    element: (
-      <ProtectedRoute>
-        <NewBudgetPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/orcamentos/:id",
-    element: (
-      <ProtectedRoute>
-        <BudgetDetailsPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/orcamentos/:id/editar",
-    element: (
-      <ProtectedRoute>
-        <EditBudgetPage />
-      </ProtectedRoute>
-    ),
-  },
+  element: (
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  ),
+  children: [
+    { path: "/dashboard", element: <DashboardPage /> },
+    { path: "/perfil", element: <ProfilePage /> },
+    { path: "/orcamentos", element: <BudgetsPage /> },
+    { path: "/orcamentos/novo", element: <NewBudgetPage /> },
+    { path: "/orcamentos/:id", element: <BudgetDetailsPage /> },
+    { path: "/orcamentos/:id/editar", element: <EditBudgetPage /> },
+  ],
+},
 ]);

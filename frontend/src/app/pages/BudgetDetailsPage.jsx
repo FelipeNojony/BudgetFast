@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import PageLoader from "../components/ui/PageLoader";
 import {
   deleteBudget,
   getBudgetById,
   downloadBudgetPdf,
 } from "../services/budgets";
+
+function formatCurrency(value) {
+  return Number(value || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
 
 export default function BudgetDetailsPage() {
   const { id } = useParams();
@@ -13,8 +22,8 @@ export default function BudgetDetailsPage() {
   const [budget, setBudget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function loadBudget() {
@@ -22,87 +31,85 @@ export default function BudgetDetailsPage() {
         const data = await getBudgetById(id);
         setBudget(data);
       } catch (error) {
-        setErrorMessage(error.message);
-      } finally {
-        setLoading(false);
-      }
+  setErrorMessage(error.message);
+  toast.error("Não foi possível carregar o orçamento.");
+} finally {
+  setLoading(false);
+}
     }
 
     loadBudget();
   }, [id]);
 
-  async function handleDelete() {
-    const confirmed = window.confirm("Tem certeza que deseja excluir este orçamento?");
+    async function handleDelete() {
+  const confirmed = window.confirm("Tem certeza que deseja excluir este orçamento?");
 
-    if (!confirmed) return;
+  if (!confirmed) return;
 
-    try {
-      setDeleting(true);
-      await deleteBudget(id);
-      navigate("/orcamentos");
-    } catch (error) {
-      setErrorMessage(error.message);
-    } finally {
-      setDeleting(false);
-    }
-  }
-
-  async function handleDownloadPdf() {
   try {
-    setDownloading(true);
-    setErrorMessage("");
-    await downloadBudgetPdf(id);
+    setDeleting(true);
+    await deleteBudget(id);
+    toast.success("Orçamento excluído com sucesso.");
+    navigate("/orcamentos");
   } catch (error) {
     setErrorMessage(error.message);
+    toast.error("Não foi possível excluir o orçamento.");
   } finally {
-    setDownloading(false);
+    setDeleting(false);
   }
 }
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <p>Carregando orçamento...</p>
-      </main>
-    );
+  async function handleDownload() {
+    try {
+      setDownloading(true);
+      await downloadBudgetPdf(id);
+      toast.success("PDF gerado com sucesso.");
+    } catch {
+      toast.error("Erro ao gerar PDF.");
+    } finally {
+      setDownloading(false);
+    }
   }
 
-  if (!budget) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <p>Orçamento não encontrado.</p>
-      </main>
-    );
+  if (loading) {
+    return <PageLoader message="Carregando orçamento..." />;
   }
+
+  if (!budget) return null;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white px-4 py-10">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <section className="text-slate-900">
+      <div className="mb-8 rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold">Detalhes do orçamento</h1>
-            <p className="text-slate-400 mt-2">{budget.budget_number}</p>
+            <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
+              Detalhes do orçamento
+            </span>
+
+            <h1 className="mt-4 text-3xl font-bold">
+              {budget.budget_number}
+            </h1>
+
+            <p className="mt-2 text-slate-600">
+              Cliente:{" "}
+              <span className="font-medium text-slate-900">
+                {budget.client_name}
+              </span>
+            </p>
           </div>
 
-          <div className="flex gap-3">
-            <Link
-              to="/orcamentos"
-              className="rounded-xl border border-slate-700 px-5 py-3 font-semibold hover:bg-slate-900 transition"
-            >
-              Voltar
-            </Link>
-
+          <div className="flex flex-wrap gap-3">
             <button
-              onClick={handleDownloadPdf}
+              onClick={handleDownload}
               disabled={downloading}
-              className="rounded-xl border border-slate-700 px-5 py-3 font-semibold hover:bg-slate-900 transition disabled:opacity-50"
+              className="rounded-xl bg-blue-600 px-5 py-3 text-white font-semibold hover:bg-blue-500 active:scale-95 transition"
             >
-              {downloading ? "Gerando PDF..." : "Baixar PDF"}
+              {downloading ? "Gerando..." : "Baixar PDF"}
             </button>
-            
+
             <Link
-              to={`/orcamentos/${budget.id}/editar`}
-              className="rounded-xl bg-white text-slate-950 px-5 py-3 font-semibold hover:opacity-90 transition"
+              to={`/orcamentos/${id}/editar`}
+              className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               Editar
             </Link>
@@ -110,101 +117,114 @@ export default function BudgetDetailsPage() {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="rounded-xl bg-red-500 px-5 py-3 font-semibold hover:opacity-90 transition disabled:opacity-50"
+              className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-semibold text-red-600 hover:bg-red-100 transition"
             >
               {deleting ? "Excluindo..." : "Excluir"}
             </button>
-            
           </div>
-        </div>
-
-        {errorMessage && (
-          <p className="text-red-400 mb-4">{errorMessage}</p>
-        )}
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-xl font-semibold mb-4">Cliente</h2>
-              <div className="grid gap-4 md:grid-cols-2 text-slate-300">
-                <p><span className="text-slate-500">Nome:</span> {budget.client_name}</p>
-                <p><span className="text-slate-500">E-mail:</span> {budget.client_email || "-"}</p>
-                <p><span className="text-slate-500">Telefone:</span> {budget.client_phone || "-"}</p>
-                <p><span className="text-slate-500">Empresa:</span> {budget.client_company || "-"}</p>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-xl font-semibold mb-4">Dados do orçamento</h2>
-              <div className="grid gap-4 md:grid-cols-2 text-slate-300">
-                <p><span className="text-slate-500">Emissão:</span> {budget.issue_date}</p>
-                <p><span className="text-slate-500">Validade:</span> {budget.valid_until || "-"}</p>
-                <p><span className="text-slate-500">Prazo:</span> {budget.delivery_time || "-"}</p>
-                <p><span className="text-slate-500">Pagamento:</span> {budget.payment_terms || "-"}</p>
-                <p><span className="text-slate-500">Status:</span> {budget.status === "finalized" ? "Finalizado" : "Rascunho"}</p>
-              </div>
-
-              <div className="mt-4">
-                <p className="text-slate-500 mb-2">Observações:</p>
-                <p className="text-slate-300">{budget.notes || "-"}</p>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-xl font-semibold mb-4">Itens</h2>
-
-              <div className="space-y-4">
-                {budget.items?.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-slate-800 bg-slate-950 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <p className="text-slate-400 mt-1">{item.description || "-"}</p>
-                      </div>
-
-                      <div className="text-right text-sm text-slate-300">
-                        <p>Qtd: {Number(item.quantity)}</p>
-                        <p>Unitário: R$ {Number(item.unit_price).toFixed(2)}</p>
-                        <p className="font-semibold mt-2">
-                          Total: R$ {Number(item.total_price).toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          <aside>
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 sticky top-6">
-              <h2 className="text-xl font-semibold mb-4">Resumo</h2>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span>Subtotal</span>
-                  <span className="text-white">R$ {Number(budget.subtotal).toFixed(2)}</span>
-                </div>
-
-                <div className="flex items-center justify-between text-slate-400">
-                  <span>Desconto</span>
-                  <span className="text-white">R$ {Number(budget.discount).toFixed(2)}</span>
-                </div>
-
-                <div className="h-px bg-slate-800" />
-
-                <div className="flex items-center justify-between text-base font-semibold">
-                  <span>Total</span>
-                  <span>R$ {Number(budget.total).toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
-    </main>
+
+      {errorMessage && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8 space-y-6">
+          <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">
+              Dados do cliente
+            </h2>
+
+            <div className="grid gap-3 text-sm">
+              <p><strong>Nome:</strong> {budget.client_name}</p>
+              <p><strong>Email:</strong> {budget.client_email || "-"}</p>
+              <p><strong>Telefone:</strong> {budget.client_phone || "-"}</p>
+              <p><strong>Empresa:</strong> {budget.client_company || "-"}</p>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">
+              Itens do orçamento
+            </h2>
+
+            <div className="space-y-4">
+              {budget.items.map((item, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <p className="font-semibold">{item.title}</p>
+
+                  {item.description && (
+                    <p className="text-sm text-slate-500 mt-1">
+                      {item.description}
+                    </p>
+                  )}
+
+                  <div className="flex justify-between mt-3 text-sm">
+                    <span>Qtd: {item.quantity}</span>
+                    <span>{formatCurrency(item.unit_price)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(item.total_price)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">
+              Observações
+            </h2>
+
+            <p className="text-sm text-slate-600 whitespace-pre-wrap">
+              {budget.notes || "Nenhuma observação."}
+            </p>
+          </div>
+        </div>
+
+        <aside className="lg:col-span-4">
+          <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm sticky top-24">
+            <h2 className="text-xl font-semibold mb-5">
+              Resumo
+            </h2>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>{formatCurrency(budget.subtotal)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Desconto</span>
+                <span>{formatCurrency(budget.discount)}</span>
+              </div>
+
+              <div className="border-t border-slate-200 pt-3 flex justify-between font-semibold text-base">
+                <span>Total</span>
+                <span>{formatCurrency(budget.total)}</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <span
+                className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                  budget.status === "finalized"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {budget.status === "finalized" ? "Finalizado" : "Rascunho"}
+              </span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
   );
 }

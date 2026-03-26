@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import PageLoader from "../components/ui/PageLoader";
 import { getBudgetById, updateBudget } from "../services/budgets";
 
 const initialItem = {
@@ -8,6 +10,13 @@ const initialItem = {
   quantity: 1,
   unit_price: 0,
 };
+
+function formatCurrency(value) {
+  return Number(value || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
 
 export default function EditBudgetPage() {
   const { id } = useParams();
@@ -64,6 +73,7 @@ export default function EditBudgetPage() {
         );
       } catch (error) {
         setErrorMessage(error.message);
+        toast.error("Não foi possível carregar o orçamento.");
       } finally {
         setLoading(false);
       }
@@ -143,342 +153,373 @@ export default function EditBudgetPage() {
       });
 
       setMessage("Orçamento atualizado com sucesso.");
+      toast.success("Orçamento atualizado com sucesso.");
 
       setTimeout(() => {
         navigate(`/orcamentos/${id}`);
       }, 1000);
     } catch (error) {
       setErrorMessage(error.message);
+      toast.error("Não foi possível atualizar o orçamento.");
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <p>Carregando orçamento...</p>
-      </main>
-    );
+    return <PageLoader message="Carregando orçamento..." />;
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white px-4 py-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Editar orçamento</h1>
-          <p className="text-slate-400 mt-2">
-            Atualize os dados e os itens do orçamento.
-          </p>
-        </div>
+    <section className="text-slate-900">
+      <div className="mb-8 rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+        <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
+          Edição de orçamento
+        </span>
 
-        <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-xl font-semibold mb-4">Dados do cliente</h2>
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">
+          Editar orçamento
+        </h1>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Nome do cliente
-                  </label>
-                  <input
-                    type="text"
-                    name="client_name"
-                    value={formData.client_name}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                    required
-                  />
-                </div>
+        <p className="mt-3 max-w-2xl text-slate-600">
+          Atualize os dados do cliente, ajuste os itens e revise os totais antes
+          de salvar as alterações.
+        </p>
+      </div>
 
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    E-mail
-                  </label>
-                  <input
-                    type="email"
-                    name="client_email"
-                    value={formData.client_email}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
+      <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
+          <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-5 text-xl font-semibold text-slate-900">
+              Dados do cliente
+            </h2>
 
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Telefone
-                  </label>
-                  <input
-                    type="text"
-                    name="client_phone"
-                    value={formData.client_phone}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Empresa
-                  </label>
-                  <input
-                    type="text"
-                    name="client_company"
-                    value={formData.client_company}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Nome do cliente
+                </label>
+                <input
+                  type="text"
+                  name="client_name"
+                  value={formData.client_name}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  required
+                />
               </div>
-            </section>
 
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-xl font-semibold mb-4">Dados do orçamento</h2>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Data de emissão
-                  </label>
-                  <input
-                    type="date"
-                    name="issue_date"
-                    value={formData.issue_date}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Validade
-                  </label>
-                  <input
-                    type="date"
-                    name="valid_until"
-                    value={formData.valid_until}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Prazo de entrega
-                  </label>
-                  <input
-                    type="text"
-                    name="delivery_time"
-                    value={formData.delivery_time}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Forma de pagamento
-                  </label>
-                  <input
-                    type="text"
-                    name="payment_terms"
-                    value={formData.payment_terms}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Desconto
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="discount"
-                    value={formData.discount}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleFormChange}
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  >
-                    <option value="draft">Rascunho</option>
-                    <option value="finalized">Finalizado</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block mb-2 text-sm text-slate-300">
-                    Observações
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleFormChange}
-                    rows="4"
-                    className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                  />
-                </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  name="client_email"
+                  value={formData.client_email}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
               </div>
-            </section>
 
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Itens do orçamento</h2>
-                <button
-                  type="button"
-                  onClick={addItem}
-                  className="rounded-xl bg-white text-slate-950 px-4 py-2 font-semibold hover:opacity-90 transition"
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Telefone
+                </label>
+                <input
+                  type="text"
+                  name="client_phone"
+                  value={formData.client_phone}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Empresa
+                </label>
+                <input
+                  type="text"
+                  name="client_company"
+                  value={formData.client_company}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-5 text-xl font-semibold text-slate-900">
+              Dados do orçamento
+            </h2>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Data de emissão
+                </label>
+                <input
+                  type="date"
+                  name="issue_date"
+                  value={formData.issue_date}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Validade
+                </label>
+                <input
+                  type="date"
+                  name="valid_until"
+                  value={formData.valid_until}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Prazo de entrega
+                </label>
+                <input
+                  type="text"
+                  name="delivery_time"
+                  value={formData.delivery_time}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Forma de pagamento
+                </label>
+                <input
+                  type="text"
+                  name="payment_terms"
+                  value={formData.payment_terms}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Desconto
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="discount"
+                  value={formData.discount}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Status
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                 >
-                  Adicionar item
-                </button>
+                  <option value="draft">Rascunho</option>
+                  <option value="finalized">Finalizado</option>
+                </select>
               </div>
 
-              <div className="space-y-4">
-                {items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="rounded-2xl border border-slate-800 bg-slate-950 p-4"
-                  >
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="md:col-span-2">
-                        <label className="block mb-2 text-sm text-slate-300">
-                          Nome do serviço
-                        </label>
-                        <input
-                          type="text"
-                          value={item.title}
-                          onChange={(event) =>
-                            handleItemChange(index, "title", event.target.value)
-                          }
-                          className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                          required
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block mb-2 text-sm text-slate-300">
-                          Descrição
-                        </label>
-                        <textarea
-                          value={item.description}
-                          onChange={(event) =>
-                            handleItemChange(index, "description", event.target.value)
-                          }
-                          rows="3"
-                          className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-2 text-sm text-slate-300">
-                          Quantidade
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={item.quantity}
-                          onChange={(event) =>
-                            handleItemChange(index, "quantity", event.target.value)
-                          }
-                          className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-2 text-sm text-slate-300">
-                          Valor unitário
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={item.unit_price}
-                          onChange={(event) =>
-                            handleItemChange(index, "unit_price", event.target.value)
-                          }
-                          className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 outline-none focus:border-slate-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between">
-                      <p className="text-slate-400 text-sm">
-                        Total do item:{" "}
-                        <span className="text-white font-semibold">
-                          R$ {calculatedItems[index].total_price.toFixed(2)}
-                        </span>
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={() => removeItem(index)}
-                        className="text-red-400 hover:text-red-300 transition"
-                      >
-                        Remover
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Observações
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleFormChange}
+                  rows="4"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
               </div>
-            </section>
-          </div>
+            </div>
+          </section>
 
-          <aside>
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 sticky top-6">
-              <h2 className="text-xl font-semibold mb-4">Resumo</h2>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span>Subtotal</span>
-                  <span className="text-white">R$ {subtotal.toFixed(2)}</span>
-                </div>
-
-                <div className="flex items-center justify-between text-slate-400">
-                  <span>Desconto</span>
-                  <span className="text-white">
-                    R$ {(Number(formData.discount) || 0).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="h-px bg-slate-800" />
-
-                <div className="flex items-center justify-between text-base font-semibold">
-                  <span>Total</span>
-                  <span>R$ {total.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {errorMessage && (
-                <p className="text-sm text-red-400 mt-4">{errorMessage}</p>
-              )}
-
-              {message && (
-                <p className="text-sm text-green-400 mt-4">{message}</p>
-              )}
+          <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+              <h2 className="text-xl font-semibold text-slate-900">
+                Itens do orçamento
+              </h2>
 
               <button
-                type="submit"
-                disabled={saving}
-                className="w-full mt-6 rounded-xl bg-white text-slate-950 py-3 font-semibold hover:opacity-90 transition disabled:opacity-50"
+                type="button"
+                onClick={addItem}
+                className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95"
               >
-                {saving ? "Salvando..." : "Salvar alterações"}
+                Adicionar item
               </button>
             </div>
-          </aside>
-        </form>
-      </div>
-    </main>
+
+            <div className="space-y-4">
+              {items.map((item, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-sm font-medium text-slate-700">
+                        Nome do serviço
+                      </label>
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(event) =>
+                          handleItemChange(index, "title", event.target.value)
+                        }
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        required
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-sm font-medium text-slate-700">
+                        Descrição
+                      </label>
+                      <textarea
+                        value={item.description}
+                        onChange={(event) =>
+                          handleItemChange(index, "description", event.target.value)
+                        }
+                        rows="3"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">
+                        Quantidade
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.quantity}
+                        onChange={(event) =>
+                          handleItemChange(index, "quantity", event.target.value)
+                        }
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">
+                        Valor unitário
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.unit_price}
+                        onChange={(event) =>
+                          handleItemChange(index, "unit_price", event.target.value)
+                        }
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-slate-500">
+                      Total do item:{" "}
+                      <span className="font-semibold text-slate-900">
+                        {formatCurrency(calculatedItems[index].total_price)}
+                      </span>
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-100"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside className="lg:col-span-4">
+          <div className="sticky top-24 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-5 text-xl font-semibold text-slate-900">
+              Resumo do orçamento
+            </h2>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                <span>Subtotal</span>
+                <span className="font-medium text-slate-900">
+                  {formatCurrency(subtotal)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                <span>Desconto</span>
+                <span className="font-medium text-slate-900">
+                  {formatCurrency(formData.discount)}
+                </span>
+              </div>
+
+              <div className="h-px bg-slate-200" />
+
+              <div className="flex items-center justify-between text-base font-semibold text-slate-900">
+                <span>Total</span>
+                <span>{formatCurrency(total)}</span>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Status atual
+              </p>
+
+              <span
+                className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                  formData.status === "finalized"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {formData.status === "finalized" ? "Finalizado" : "Rascunho"}
+              </span>
+            </div>
+
+            {errorMessage && (
+              <p className="mt-4 text-sm text-red-600">{errorMessage}</p>
+            )}
+
+            {message && (
+              <p className="mt-4 text-sm text-green-600">{message}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-6 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "Salvando..." : "Salvar alterações"}
+            </button>
+          </div>
+        </aside>
+      </form>
+    </section>
   );
 }
