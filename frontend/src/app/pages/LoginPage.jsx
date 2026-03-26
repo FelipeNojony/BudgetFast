@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function LoginPage() {
   const { signIn } = useAuth();
@@ -22,7 +22,10 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(form.email, form.password);
+    const { error } = await signIn({
+      email: form.email,
+      password: form.password,
+    });
 
     if (error) {
       toast.error(error.message);
@@ -52,7 +55,7 @@ export default function LoginPage() {
             placeholder="E-mail"
             value={form.email}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
           />
 
           <input
@@ -61,7 +64,7 @@ export default function LoginPage() {
             placeholder="Senha"
             value={form.password}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
           />
 
           <button

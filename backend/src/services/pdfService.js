@@ -29,7 +29,7 @@ function escapeHtml(value = "") {
 }
 
 function buildBudgetPdfHtml(profile, budget) {
-  const primaryColor = profile?.primary_color || "#0f172a";
+  const primaryColor = profile?.primary_color || "#2563eb";
   const businessName = profile?.business_name || "Seu Negócio";
   const fullName = profile?.full_name || "";
   const email = profile?.email || "";
@@ -67,12 +67,20 @@ function buildBudgetPdfHtml(profile, budget) {
             font-family: Arial, Helvetica, sans-serif;
             color: #0f172a;
             background: #ffffff;
-            padding: 32px;
+            padding: 36px;
           }
 
           .container {
-            max-width: 900px;
+            max-width: 920px;
             margin: 0 auto;
+          }
+
+          .topbar {
+            height: 8px;
+            width: 100%;
+            background: ${primaryColor};
+            border-radius: 999px;
+            margin-bottom: 28px;
           }
 
           .header {
@@ -81,12 +89,16 @@ function buildBudgetPdfHtml(profile, budget) {
             gap: 24px;
             align-items: flex-start;
             padding-bottom: 24px;
-            border-bottom: 3px solid ${primaryColor};
+            border-bottom: 1px solid #e2e8f0;
           }
 
           .brand h1 {
             margin: 0;
             font-size: 28px;
+            color: #0f172a;
+          }
+
+          .brand .accent {
             color: ${primaryColor};
           }
 
@@ -96,20 +108,24 @@ function buildBudgetPdfHtml(profile, budget) {
             font-size: 14px;
           }
 
-          .document-title {
-            text-align: right;
+          .document-box {
+            min-width: 260px;
+            border: 1px solid #dbeafe;
+            background: #eff6ff;
+            border-radius: 16px;
+            padding: 18px;
           }
 
-          .document-title h2 {
-            margin: 0;
-            font-size: 24px;
-            color: #111827;
+          .document-box h2 {
+            margin: 0 0 10px;
+            font-size: 22px;
+            color: #0f172a;
           }
 
-          .document-title p {
-            margin: 6px 0 0;
-            color: #475569;
+          .document-box p {
+            margin: 6px 0;
             font-size: 14px;
+            color: #334155;
           }
 
           .section {
@@ -117,11 +133,12 @@ function buildBudgetPdfHtml(profile, budget) {
           }
 
           .section-title {
-            margin: 0 0 12px;
+            margin: 0 0 14px;
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: ${primaryColor};
+            font-weight: bold;
           }
 
           .grid {
@@ -133,12 +150,12 @@ function buildBudgetPdfHtml(profile, budget) {
           .card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 16px;
+            padding: 18px;
           }
 
           .card p {
-            margin: 0 0 8px;
+            margin: 0 0 10px;
             font-size: 14px;
             color: #334155;
           }
@@ -151,14 +168,17 @@ function buildBudgetPdfHtml(profile, budget) {
             width: 100%;
             border-collapse: collapse;
             margin-top: 12px;
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
           }
 
           thead {
-            background: #f1f5f9;
+            background: #f8fafc;
           }
 
           th, td {
-            padding: 12px 10px;
+            padding: 14px 12px;
             border-bottom: 1px solid #e2e8f0;
             font-size: 14px;
             vertical-align: top;
@@ -167,6 +187,10 @@ function buildBudgetPdfHtml(profile, budget) {
           th {
             text-align: left;
             color: #334155;
+          }
+
+          tbody tr:last-child td {
+            border-bottom: none;
           }
 
           .text-right {
@@ -186,16 +210,17 @@ function buildBudgetPdfHtml(profile, budget) {
           .summary {
             margin-top: 24px;
             margin-left: auto;
-            width: 320px;
+            width: 340px;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 18px;
             overflow: hidden;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
           }
 
           .summary-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 14px 18px;
             font-size: 14px;
             background: #ffffff;
             border-bottom: 1px solid #e2e8f0;
@@ -216,11 +241,11 @@ function buildBudgetPdfHtml(profile, budget) {
             white-space: pre-wrap;
             font-size: 14px;
             color: #334155;
-            line-height: 1.6;
+            line-height: 1.7;
           }
 
           .footer {
-            margin-top: 40px;
+            margin-top: 42px;
             padding-top: 20px;
             border-top: 1px solid #e2e8f0;
             font-size: 12px;
@@ -231,19 +256,24 @@ function buildBudgetPdfHtml(profile, budget) {
       </head>
       <body>
         <div class="container">
+          <div class="topbar"></div>
+
           <header class="header">
             <div class="brand">
-              <h1>${escapeHtml(businessName)}</h1>
+              <h1><span class="accent">${escapeHtml(businessName)}</span></h1>
               ${fullName ? `<p>${escapeHtml(fullName)}</p>` : ""}
               ${email ? `<p>${escapeHtml(email)}</p>` : ""}
               ${phone ? `<p>${escapeHtml(phone)}</p>` : ""}
             </div>
 
-            <div class="document-title">
+            <div class="document-box">
               <h2>Orçamento</h2>
               <p><strong>Número:</strong> ${escapeHtml(budget.budget_number)}</p>
               <p><strong>Emissão:</strong> ${formatDate(budget.issue_date)}</p>
               <p><strong>Validade:</strong> ${formatDate(budget.valid_until)}</p>
+              <p><strong>Status:</strong> ${
+                budget.status === "finalized" ? "Finalizado" : "Rascunho"
+              }</p>
             </div>
           </header>
 
@@ -260,7 +290,9 @@ function buildBudgetPdfHtml(profile, budget) {
               <div class="card">
                 <p><strong>Prazo de entrega:</strong> ${escapeHtml(budget.delivery_time || "-")}</p>
                 <p><strong>Forma de pagamento:</strong> ${escapeHtml(budget.payment_terms || "-")}</p>
-                <p><strong>Status:</strong> ${budget.status === "finalized" ? "Finalizado" : "Rascunho"}</p>
+                <p><strong>Observação rápida:</strong> ${
+                  budget.notes ? escapeHtml(budget.notes).slice(0, 80) : "-"
+                }</p>
               </div>
             </div>
           </section>
@@ -300,12 +332,14 @@ function buildBudgetPdfHtml(profile, budget) {
           <section class="section">
             <h3 class="section-title">Observações</h3>
             <div class="card">
-              <div class="notes">${escapeHtml(budget.notes || "Nenhuma observação informada.")}</div>
+              <div class="notes">${escapeHtml(
+                budget.notes || "Nenhuma observação informada."
+              )}</div>
             </div>
           </section>
 
           <footer class="footer">
-            Documento gerado automaticamente pelo BudgetFast.
+            Documento gerado automaticamente pelo BudgetFast • orçamento profissional em PDF
           </footer>
         </div>
       </body>

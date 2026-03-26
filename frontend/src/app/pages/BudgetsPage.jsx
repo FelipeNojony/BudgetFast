@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import EmptyState from "../components/ui/EmptyState";
 import PageLoader from "../components/ui/PageLoader";
 import { getBudgets } from "../services/budgets";
+import { formatDate } from "../../utils/formatters";
 
 function formatCurrency(value) {
   return Number(value || 0).toLocaleString("pt-BR", {
@@ -108,7 +109,7 @@ export default function BudgetsPage() {
                     </td>
 
                     <td className="px-6 py-5 text-slate-600">
-                      {budget.issue_date}
+                      {formatDate(budget.issue_date)}
                     </td>
 
                     <td className="px-6 py-5">
@@ -170,7 +171,7 @@ export default function BudgetsPage() {
                 </div>
 
                 <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-slate-500">{budget.issue_date}</span>
+                  <span className="text-slate-500">{formatDate(budget.issue_date)}</span>
                   <span className="font-semibold text-slate-900">
                     {formatCurrency(budget.total)}
                   </span>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import PageLoader from "../components/ui/PageLoader";
 import { getProfile, createProfile, updateProfile } from "../services/profile";
+import { formatPhone } from "../../utils/formatters";
 
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
@@ -19,13 +20,13 @@ export default function ProfilePage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   function handleChange(event) {
-    const { name, value } = event.target;
+  const { name, value } = event.target;
 
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  }
+  setFormData((prevState) => ({
+    ...prevState,
+    [name]: name === "phone" ? formatPhone(value) : value,
+  }));
+}
 
   async function loadProfile() {
     try {

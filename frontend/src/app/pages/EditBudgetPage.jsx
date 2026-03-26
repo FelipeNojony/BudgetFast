@@ -3,6 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import PageLoader from "../components/ui/PageLoader";
 import { getBudgetById, updateBudget } from "../services/budgets";
+import {
+  formatCurrency,
+  formatCurrencyInput,
+  formatPhone,
+  parseCurrencyInput,
+} from "../../utils/formatters";
 
 const initialItem = {
   title: "",
@@ -11,12 +17,6 @@ const initialItem = {
   unit_price: 0,
 };
 
-function formatCurrency(value) {
-  return Number(value || 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
 
 export default function EditBudgetPage() {
   const { id } = useParams();
@@ -83,29 +83,47 @@ export default function EditBudgetPage() {
   }, [id]);
 
   function handleFormChange(event) {
-    const { name, value } = event.target;
+  const { name, value } = event.target;
 
-    setFormData((prevState) => ({
+  setFormData((prevState) => {
+    if (name === "client_phone") {
+      return {
+        ...prevState,
+        [name]: formatPhone(value),
+      };
+    }
+
+    if (name === "discount") {
+      return {
+        ...prevState,
+        [name]: parseCurrencyInput(value),
+      };
+    }
+
+    return {
       ...prevState,
       [name]: value,
-    }));
-  }
+    };
+  });
+}
 
   function handleItemChange(index, field, value) {
-    setItems((prevItems) =>
-      prevItems.map((item, itemIndex) =>
-        itemIndex === index
-          ? {
-              ...item,
-              [field]:
-                field === "quantity" || field === "unit_price"
-                  ? Number(value)
-                  : value,
-            }
-          : item
-      )
-    );
-  }
+  setItems((prevItems) =>
+    prevItems.map((item, itemIndex) =>
+      itemIndex === index
+        ? {
+            ...item,
+            [field]:
+              field === "quantity"
+                ? Number(value)
+                : field === "unit_price"
+                ? parseCurrencyInput(value)
+                : value,
+          }
+        : item
+    )
+  );
+}
 
   function addItem() {
     setItems((prevItems) => [...prevItems, { ...initialItem }]);
@@ -314,10 +332,11 @@ export default function EditBudgetPage() {
                   Desconto
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   step="0.01"
                   name="discount"
-                  value={formData.discount}
+                  value={formatCurrencyInput(formData.discount)}
                   onChange={handleFormChange}
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                 />
@@ -424,9 +443,10 @@ export default function EditBudgetPage() {
                         Valor unitário
                       </label>
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         step="0.01"
-                        value={item.unit_price}
+                        value={formatCurrencyInput(formData.discount)}
                         onChange={(event) =>
                           handleItemChange(index, "unit_price", event.target.value)
                         }
