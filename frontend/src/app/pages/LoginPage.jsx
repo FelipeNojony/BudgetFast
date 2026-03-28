@@ -41,7 +41,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-[#f6f8fb] px-4">
       <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold text-slate-900">
-          Entrar no BudgetFast
+          Bem vindo ao Orça<span className="text-[#f66504]">Pro</span>
         </h1>
 
         <p className="mt-2 text-slate-600">
@@ -55,7 +55,7 @@ export default function LoginPage() {
             placeholder="E-mail"
             value={form.email}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf] outline-none"
           />
 
           <input
@@ -64,12 +64,12 @@ export default function LoginPage() {
             placeholder="Senha"
             value={form.password}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf] outline-none"
           />
 
           <button
             disabled={loading}
-            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-500 transition"
+            className="w-full rounded-xl bg-[#f66504] py-3 font-semibold text-white hover:bg-[#e15a00] transition"
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>
@@ -77,8 +77,8 @@ export default function LoginPage() {
 
         <p className="mt-6 text-sm text-slate-600">
           Não tem conta?{" "}
-          <Link to="/register" className="text-blue-600 font-medium">
-            Criar conta
+          <Link to="/cadastro" className="text-[#f66504] font-medium">
+            Criar sua conta
           </Link>
         </p>
       </div>

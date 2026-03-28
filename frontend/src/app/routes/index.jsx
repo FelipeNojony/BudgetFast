@@ -39,6 +39,7 @@ export const router = createBrowserRouter([
     { path: "/orcamentos/novo", element: <NewBudgetPage /> },
     { path: "/orcamentos/:id", element: <BudgetDetailsPage /> },
     { path: "/orcamentos/:id/editar", element: <EditBudgetPage /> },
+    { path: "/cadastro", element: <RegisterPage /> },
   ],
 },
 ]);

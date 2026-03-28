@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import EmptyState from "../components/ui/EmptyState";
+import { Search, Pencil, Eye } from "lucide-react";
 import PageLoader from "../components/ui/PageLoader";
 import { getBudgets } from "../services/budgets";
-import { formatDate } from "../../utils/formatters";
 
 function formatCurrency(value) {
   return Number(value || 0).toLocaleString("pt-BR", {
@@ -12,18 +11,32 @@ function formatCurrency(value) {
   });
 }
 
+function formatDate(dateString) {
+  if (!dateString) return "-";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
+
+  return date.toLocaleDateString("pt-BR");
+}
+
 export default function BudgetsPage() {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     async function loadBudgets() {
       try {
         const data = await getBudgets();
-        setBudgets(data);
+        setBudgets(data || []);
       } catch (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(error.message || "Erro ao carregar orçamentos.");
       } finally {
         setLoading(false);
       }
@@ -32,36 +45,36 @@ export default function BudgetsPage() {
     loadBudgets();
   }, []);
 
+  const filteredBudgets = useMemo(() => {
+    return budgets.filter((budget) => {
+      const matchesSearch =
+        budget.client_name?.toLowerCase().includes(search.toLowerCase()) ||
+        budget.budget_number?.toLowerCase().includes(search.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : statusFilter === "finalized"
+          ? budget.status === "finalized"
+          : budget.status !== "finalized";
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [budgets, search, statusFilter]);
+
   if (loading) {
     return <PageLoader message="Carregando orçamentos..." />;
   }
 
   return (
     <section className="text-slate-900">
-      <div className="mb-8 rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
-              Gestão de orçamentos
-            </span>
-
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">
-              Orçamentos
-            </h1>
-
-            <p className="mt-3 max-w-2xl text-slate-600">
-              Visualize, acompanhe e gerencie todos os orçamentos criados no
-              sistema.
-            </p>
-          </div>
-
-          <Link
-            to="/orcamentos/novo"
-            className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95"
-          >
-            Novo orçamento
-          </Link>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+          Orçamentos
+        </h1>
+        <p className="mt-2 text-slate-600">
+          Veja os orçamentos criados e gerencie seus documentos.
+        </p>
       </div>
 
       {errorMessage && (
@@ -70,117 +83,176 @@ export default function BudgetsPage() {
         </div>
       )}
 
-      {!budgets.length ? (
-        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-          <EmptyState
-            title="Nenhum orçamento encontrado"
-            description="Crie seu primeiro orçamento para começar a usar o sistema."
-            actionLabel="Criar orçamento"
-            actionTo="/orcamentos/novo"
-          />
-        </div>
-      ) : (
-        <>
-          <div className="hidden md:block rounded-[28px] border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr className="text-left text-sm text-slate-500">
-                  <th className="px-6 py-4 font-medium">Número</th>
-                  <th className="px-6 py-4 font-medium">Cliente</th>
-                  <th className="px-6 py-4 font-medium">Data</th>
-                  <th className="px-6 py-4 font-medium">Status</th>
-                  <th className="px-6 py-4 font-medium">Total</th>
-                  <th className="px-6 py-4 font-medium">Ações</th>
-                </tr>
-              </thead>
+      <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-1 flex-col gap-4 md:flex-row">
+            <div className="relative w-full md:max-w-117.5">
+              <Search
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                placeholder="Buscar por cliente ou número..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-orange-100"
+              />
+            </div>
 
-              <tbody>
-                {budgets.map((budget) => (
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-orange-100"
+            >
+              <option value="all">Todos</option>
+              <option value="finalized">Finalizados</option>
+              <option value="draft">Rascunhos</option>
+            </select>
+          </div>
+
+          <div className="flex flex-row gap-3">
+            <Link
+              to="/perfil"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50"
+            >
+              Perfil profissional
+            </Link>
+
+            <Link
+              to="/orcamentos/novo"
+              className="inline-flex items-center justify-center rounded-xl bg-[#f66504] px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#e15a00] active:scale-[0.98]"
+            >
+              Novo orçamento
+            </Link>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-slate-200">
+          <table className="w-full">
+            <thead className="bg-slate-50">
+              <tr className="text-left text-sm text-slate-500">
+                <th className="px-5 py-4 font-medium">#</th>
+                <th className="px-5 py-4 font-medium">Cliente</th>
+                <th className="px-5 py-4 font-medium">Valor total</th>
+                <th className="px-5 py-4 font-medium">Emissão</th>
+                <th className="px-5 py-4 font-medium">Validade</th>
+                <th className="px-5 py-4 font-medium">Status</th>
+                <th className="px-5 py-4 font-medium text-right">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {!filteredBudgets.length ? (
+                <tr>
+                  <td colSpan="7" className="px-5 py-12 text-center text-slate-500">
+                    Nenhum orçamento encontrado.
+                  </td>
+                </tr>
+              ) : (
+                filteredBudgets.map((budget, index) => (
                   <tr
                     key={budget.id}
-                    className="border-t border-slate-200 transition-colors hover:bg-slate-50"
+                    className="border-t border-slate-200 bg-white transition hover:bg-slate-50"
                   >
-                    <td className="px-6 py-5 font-medium text-slate-900">
-                      {budget.budget_number}
+                    <td className="px-5 py-4">
+                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-slate-100 px-2 text-sm font-medium text-slate-600">
+                        {index + 1}
+                      </span>
                     </td>
 
-                    <td className="px-6 py-5 text-slate-700">
-                      {budget.client_name}
+                    <td className="px-5 py-4">
+                      <div>
+                        <p className="font-medium text-slate-900">
+                          {budget.client_name}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {budget.budget_number}
+                        </p>
+                      </div>
                     </td>
 
-                    <td className="px-6 py-5 text-slate-600">
+                    <td className="px-5 py-4 font-medium text-slate-900">
+                      {formatCurrency(budget.total)}
+                    </td>
+
+                    <td className="px-5 py-4 text-slate-600">
                       {formatDate(budget.issue_date)}
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-5 py-4 text-slate-600">
+                      {formatDate(budget.valid_until)}
+                    </td>
+
+                    <td className="px-5 py-4">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
                           budget.status === "finalized"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
+                            ? "bg-orange-100 text-orange-700"
+                            : "bg-slate-100 text-slate-700"
                         }`}
                       >
                         {budget.status === "finalized" ? "Finalizado" : "Rascunho"}
                       </span>
                     </td>
 
-                    <td className="px-6 py-5 font-medium text-slate-900">
-                      {formatCurrency(budget.total)}
-                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/orcamentos/${budget.id}`}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+                          title="Visualizar"
+                        >
+                          <Eye size={18} />
+                        </Link>
 
-                    <td className="px-6 py-5">
-                      <Link
-                        to={`/orcamentos/${budget.id}`}
-                        className="font-medium text-blue-600 transition-colors hover:text-blue-500 hover:underline"
-                      >
-                        Ver detalhes
-                      </Link>
+                        <Link
+                          to={`/orcamentos/${budget.id}/editar`}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+                          title="Editar"
+                        >
+                          <Pencil size={18} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <p className="text-sm text-slate-500">
+            Exibindo {filteredBudgets.length} de {budgets.length} resultado(s)
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-400"
+              disabled
+            >
+              Anterior
+            </button>
+
+            <button
+              type="button"
+              className="rounded-xl bg-[#f66504] px-4 py-2 text-sm font-semibold text-white"
+            >
+              1
+            </button>
+
+            <button
+              type="button"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-400"
+              disabled
+            >
+              Próximo
+            </button>
           </div>
-
-          <div className="space-y-4 md:hidden">
-            {budgets.map((budget) => (
-              <Link
-                key={budget.id}
-                to={`/orcamentos/${budget.id}`}
-                className="block rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="font-semibold text-slate-900">
-                      {budget.budget_number}
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-600">
-                      {budget.client_name}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                      budget.status === "finalized"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {budget.status === "finalized" ? "Finalizado" : "Rascunho"}
-                  </span>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-slate-500">{formatDate(budget.issue_date)}</span>
-                  <span className="font-semibold text-slate-900">
-                    {formatCurrency(budget.total)}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
+        </div>
+      </div>
     </section>
   );
 }

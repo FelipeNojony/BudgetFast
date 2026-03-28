@@ -5,7 +5,7 @@ import { formatCurrency,
   formatCurrencyInput,
   formatPhone,
   parseCurrencyInput,} from "../../utils/formatters";
-  
+
 const initialItem = {
   title: "",
   description: "",
@@ -150,7 +150,7 @@ export default function NewBudgetPage() {
   return (
     <section className="text-slate-900">
       <div className="mb-8 rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
-        <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
+        <span className="inline-flex rounded-full border border-[#ffd6bf] bg-[#fff3eb] px-3 py-1 text-xs text-[#f66504]">
           Criação de orçamento
         </span>
 
@@ -182,7 +182,7 @@ export default function NewBudgetPage() {
                   value={formData.client_name}
                   onChange={handleFormChange}
                   placeholder="Nome do cliente"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                   required
                 />
               </div>
@@ -197,7 +197,7 @@ export default function NewBudgetPage() {
                   value={formData.client_email}
                   onChange={handleFormChange}
                   placeholder="cliente@email.com"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -211,7 +211,7 @@ export default function NewBudgetPage() {
                   value={formData.client_phone}
                   onChange={handleFormChange}
                   placeholder="(11) 99999-9999"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -225,7 +225,7 @@ export default function NewBudgetPage() {
                   value={formData.client_company}
                   onChange={handleFormChange}
                   placeholder="Empresa do cliente"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function NewBudgetPage() {
                   name="issue_date"
                   value={formData.issue_date}
                   onChange={handleFormChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                   required
                 />
               </div>
@@ -260,7 +260,7 @@ export default function NewBudgetPage() {
                   name="valid_until"
                   value={formData.valid_until}
                   onChange={handleFormChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -274,7 +274,7 @@ export default function NewBudgetPage() {
                   value={formData.delivery_time}
                   onChange={handleFormChange}
                   placeholder="Ex: 7 dias úteis"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -288,7 +288,7 @@ export default function NewBudgetPage() {
                   value={formData.payment_terms}
                   onChange={handleFormChange}
                   placeholder="Ex: 50% entrada e 50% entrega"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -304,7 +304,7 @@ export default function NewBudgetPage() {
                   value={formatCurrencyInput(formData.discount)}
                   onChange={handleFormChange}
                   placeholder="0.00"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function NewBudgetPage() {
                   name="status"
                   value={formData.status}
                   onChange={handleFormChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 >
                   <option value="draft">Rascunho</option>
                   <option value="finalized">Finalizado</option>
@@ -333,7 +333,7 @@ export default function NewBudgetPage() {
                   onChange={handleFormChange}
                   rows="4"
                   placeholder="Informações adicionais"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
             </div>
@@ -348,7 +348,7 @@ export default function NewBudgetPage() {
               <button
                 type="button"
                 onClick={addItem}
-                className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95"
+                className="rounded-xl bg-[#f66504] px-4 py-2 font-semibold text-white transition-all duration-200 hover:bg-[#e15a00] active:scale-95"
               >
                 Adicionar item
               </button>
@@ -372,7 +372,7 @@ export default function NewBudgetPage() {
                           handleItemChange(index, "title", event.target.value)
                         }
                         placeholder="Ex: Criação de landing page"
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                         required
                       />
                     </div>
@@ -388,7 +388,7 @@ export default function NewBudgetPage() {
                         }
                         rows="3"
                         placeholder="Detalhes do serviço"
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                       />
                     </div>
 
@@ -403,7 +403,7 @@ export default function NewBudgetPage() {
                         onChange={(event) =>
                           handleItemChange(index, "quantity", event.target.value)
                         }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                       />
                     </div>
 
@@ -419,7 +419,7 @@ export default function NewBudgetPage() {
                         onChange={(event) =>
                           handleItemChange(index, "unit_price", event.target.value)
                         }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                       />
                     </div>
                   </div>
@@ -488,7 +488,7 @@ export default function NewBudgetPage() {
             <button
               type="submit"
               disabled={saving}
-              className="mt-6 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-6 w-full rounded-xl bg-[#f66504] py-3 font-semibold text-white transition-all duration-200 hover:bg-[#e15a00] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Salvando..." : "Salvar orçamento"}
             </button>

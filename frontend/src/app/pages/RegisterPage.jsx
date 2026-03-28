@@ -45,7 +45,7 @@ export default function RegisterPage() {
         </h1>
 
         <p className="mt-2 text-slate-600">
-          Comece a usar o BudgetFast agora
+          Comece a usar o <span className="font-bold text-slate-900">Orça<span className="text-[#f66504]">Pro</span></span> agora
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -55,7 +55,7 @@ export default function RegisterPage() {
             placeholder="E-mail"
             value={form.email}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf] outline-none"
           />
 
           <input
@@ -64,12 +64,12 @@ export default function RegisterPage() {
             placeholder="Senha"
             value={form.password}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf] outline-none"
           />
 
           <button
             disabled={loading}
-            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-500 transition"
+            className="w-full rounded-xl bg-[#f66504] py-3 font-semibold text-white hover:bg-[#e15a00] transition"
           >
             {loading ? "Criando..." : "Criar conta"}
           </button>
@@ -77,7 +77,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-sm text-slate-600">
           Já tem conta?{" "}
-          <Link to="/login" className="text-blue-600 font-medium">
+          <Link to="/login" className="text-[#f66504] font-medium">
             Entrar
           </Link>
         </p>

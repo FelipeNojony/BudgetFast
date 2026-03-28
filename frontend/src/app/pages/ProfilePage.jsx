@@ -10,7 +10,7 @@ export default function ProfilePage() {
     business_name: "",
     email: "",
     phone: "",
-    primary_color: "#2563eb",
+    primary_color: "#f66504",
   });
 
   const [profileExists, setProfileExists] = useState(false);
@@ -41,7 +41,7 @@ export default function ProfilePage() {
           business_name: data.business_name || "",
           email: data.email || "",
           phone: data.phone || "",
-          primary_color: data.primary_color || "#2563eb",
+          primary_color: data.primary_color || "#f66504",
         });
         setProfileExists(true);
       }
@@ -89,7 +89,7 @@ export default function ProfilePage() {
   return (
     <section className="text-slate-900">
       <div className="mb-8 rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
-        <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
+        <span className="inline-flex rounded-full border border-[#ffd6bf] bg-[#fff3eb] px-3 py-1 text-xs text-[#f66504]">
           Configuração da conta
         </span>
 
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                   value={formData.full_name}
                   onChange={handleChange}
                   placeholder="Seu nome"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export default function ProfilePage() {
                   value={formData.business_name}
                   onChange={handleChange}
                   placeholder="Ex: Studio Criativo"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -145,7 +145,7 @@ export default function ProfilePage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="contato@empresa.com"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -159,7 +159,7 @@ export default function ProfilePage() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="(11) 99999-9999"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
 
@@ -197,7 +197,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-[#f66504] px-5 py-3 font-semibold text-white transition-all duration-200 hover:bg-[#e15a00] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? "Salvando..." : "Salvar perfil"}
               </button>

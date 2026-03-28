@@ -82,7 +82,7 @@ export default function BudgetDetailsPage() {
       <div className="mb-8 rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
+            <span className="inline-flex rounded-full border border-[#ffd6bf] bg-[#fff3eb] px-3 py-1 text-xs text-[#f66504]">
               Detalhes do orçamento
             </span>
 
@@ -102,7 +102,7 @@ export default function BudgetDetailsPage() {
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="rounded-xl bg-blue-600 px-5 py-3 text-white font-semibold hover:bg-blue-500 active:scale-95 transition"
+              className="rounded-xl bg-[#f66504] px-5 py-3 text-white font-semibold hover:bg-[#e15a00] active:scale-95 transition"
             >
               {downloading ? "Gerando..." : "Baixar PDF"}
             </button>
