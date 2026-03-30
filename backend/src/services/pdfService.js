@@ -7,45 +7,41 @@ function formatCurrency(value) {
   });
 }
 
-function formatDate(dateString) {
-  if (!dateString) return "-";
+function formatDate(value) {
+  if (!value) return "-";
 
-  const date = new Date(dateString);
-
-  if (Number.isNaN(date.getTime())) {
-    return dateString;
+  try {
+    return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
+  } catch {
+    return value;
   }
-
-  return date.toLocaleDateString("pt-BR");
 }
 
-function escapeHtml(value = "") {
-  return String(value)
+function escapeHtml(value) {
+  return String(value || "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replaceAll("'", "&#039;");
 }
 
-function buildBudgetPdfHtml(profile, budget) {
-  const primaryColor = profile?.primary_color || "#2563eb";
-  const businessName = profile?.business_name || "Seu Negócio";
-  const fullName = profile?.full_name || "";
-  const email = profile?.email || "";
-  const phone = profile?.phone || "";
+function buildBudgetHtml({ budget, profile }) {
+  const primaryColor = profile?.primary_color || "#f66504";
+  const businessName = profile?.business_name || "OrçaPro";
+  const responsibleName = profile?.full_name || "";
+  const businessEmail = profile?.email || "";
+  const businessPhone = profile?.phone || "";
 
   const itemsRows = (budget.items || [])
     .map(
       (item) => `
         <tr>
-          <td>
-            <strong>${escapeHtml(item.title)}</strong>
-            <div class="item-description">${escapeHtml(item.description || "")}</div>
-          </td>
-          <td class="text-center">${Number(item.quantity || 0)}</td>
-          <td class="text-right">${formatCurrency(item.unit_price)}</td>
-          <td class="text-right">${formatCurrency(item.total_price)}</td>
+          <td>${escapeHtml(item.title)}</td>
+          <td>${escapeHtml(item.description || "-")}</td>
+          <td style="text-align:center;">${Number(item.quantity || 0)}</td>
+          <td style="text-align:right;">${formatCurrency(item.unit_price)}</td>
+          <td style="text-align:right;">${formatCurrency(item.total_price)}</td>
         </tr>
       `
     )
@@ -56,49 +52,32 @@ function buildBudgetPdfHtml(profile, budget) {
     <html lang="pt-BR">
       <head>
         <meta charset="UTF-8" />
-        <title>Orçamento ${escapeHtml(budget.budget_number)}</title>
+        <title>Orçamento ${escapeHtml(budget.budget_number || "")}</title>
         <style>
           * {
             box-sizing: border-box;
           }
 
           body {
-            margin: 0;
             font-family: Arial, Helvetica, sans-serif;
             color: #0f172a;
+            margin: 0;
+            padding: 32px;
             background: #ffffff;
-            padding: 36px;
-          }
-
-          .container {
-            max-width: 920px;
-            margin: 0 auto;
-          }
-
-          .topbar {
-            height: 8px;
-            width: 100%;
-            background: ${primaryColor};
-            border-radius: 999px;
-            margin-bottom: 28px;
           }
 
           .header {
             display: flex;
             justify-content: space-between;
-            gap: 24px;
             align-items: flex-start;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 3px solid ${primaryColor};
+            padding-bottom: 20px;
+            margin-bottom: 28px;
           }
 
           .brand h1 {
             margin: 0;
             font-size: 28px;
-            color: #0f172a;
-          }
-
-          .brand .accent {
             color: ${primaryColor};
           }
 
@@ -108,69 +87,54 @@ function buildBudgetPdfHtml(profile, budget) {
             font-size: 14px;
           }
 
-          .document-box {
-            min-width: 260px;
-            border: 1px solid #dbeafe;
-            background: #eff6ff;
-            border-radius: 16px;
-            padding: 18px;
+          .doc-title {
+            text-align: right;
           }
 
-          .document-box h2 {
-            margin: 0 0 10px;
-            font-size: 22px;
+          .doc-title h2 {
+            margin: 0;
+            font-size: 24px;
             color: #0f172a;
           }
 
-          .document-box p {
-            margin: 6px 0;
+          .doc-title p {
+            margin: 6px 0 0;
+            color: #475569;
             font-size: 14px;
-            color: #334155;
           }
 
           .section {
-            margin-top: 28px;
+            margin-bottom: 24px;
           }
 
           .section-title {
-            margin: 0 0 14px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            margin: 0 0 12px;
+            font-size: 16px;
             color: ${primaryColor};
-            font-weight: bold;
+            border-left: 4px solid ${primaryColor};
+            padding-left: 10px;
           }
 
           .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 14px 24px;
           }
 
-          .card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 18px;
-          }
-
-          .card p {
-            margin: 0 0 10px;
+          .field {
             font-size: 14px;
-            color: #334155;
           }
 
-          .card p:last-child {
-            margin-bottom: 0;
+          .field strong {
+            display: block;
+            color: #334155;
+            margin-bottom: 4px;
           }
 
           table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 12px;
-            overflow: hidden;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
+            margin-top: 10px;
           }
 
           thead {
@@ -178,9 +142,9 @@ function buildBudgetPdfHtml(profile, budget) {
           }
 
           th, td {
-            padding: 14px 12px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 14px;
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            font-size: 13px;
             vertical-align: top;
           }
 
@@ -189,64 +153,40 @@ function buildBudgetPdfHtml(profile, budget) {
             color: #334155;
           }
 
-          tbody tr:last-child td {
-            border-bottom: none;
-          }
-
-          .text-right {
-            text-align: right;
-          }
-
-          .text-center {
-            text-align: center;
-          }
-
-          .item-description {
-            margin-top: 4px;
-            color: #64748b;
-            font-size: 12px;
-          }
-
-          .summary {
-            margin-top: 24px;
+          .totals {
+            margin-top: 18px;
             margin-left: auto;
-            width: 340px;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+            width: 320px;
           }
 
-          .summary-row {
+          .totals-row {
             display: flex;
             justify-content: space-between;
-            padding: 14px 18px;
-            font-size: 14px;
-            background: #ffffff;
+            padding: 8px 0;
             border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
           }
 
-          .summary-row:last-child {
-            border-bottom: none;
-          }
-
-          .summary-row.total {
-            background: ${primaryColor};
-            color: white;
+          .totals-row.total {
+            font-size: 18px;
             font-weight: bold;
-            font-size: 16px;
+            color: ${primaryColor};
+            border-bottom: none;
+            padding-top: 14px;
           }
 
           .notes {
-            white-space: pre-wrap;
+            margin-top: 16px;
             font-size: 14px;
             color: #334155;
-            line-height: 1.7;
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 12px;
           }
 
           .footer {
-            margin-top: 42px;
-            padding-top: 20px;
+            margin-top: 36px;
+            padding-top: 16px;
             border-top: 1px solid #e2e8f0;
             font-size: 12px;
             color: #64748b;
@@ -255,106 +195,136 @@ function buildBudgetPdfHtml(profile, budget) {
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="topbar"></div>
+        <div class="header">
+          <div class="brand">
+            <h1>${escapeHtml(businessName)}</h1>
+            <p>${escapeHtml(responsibleName)}</p>
+            <p>${escapeHtml(businessEmail)}</p>
+            <p>${escapeHtml(businessPhone)}</p>
+          </div>
 
-          <header class="header">
-            <div class="brand">
-              <h1><span class="accent">${escapeHtml(businessName)}</span></h1>
-              ${fullName ? `<p>${escapeHtml(fullName)}</p>` : ""}
-              ${email ? `<p>${escapeHtml(email)}</p>` : ""}
-              ${phone ? `<p>${escapeHtml(phone)}</p>` : ""}
+          <div class="doc-title">
+            <h2>Orçamento</h2>
+            <p>Nº ${escapeHtml(budget.budget_number || "-")}</p>
+            <p>Emitido em ${formatDate(budget.issue_date)}</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 class="section-title">Dados do cliente</h3>
+          <div class="grid">
+            <div class="field">
+              <strong>Cliente</strong>
+              <span>${escapeHtml(budget.client_name || "-")}</span>
             </div>
 
-            <div class="document-box">
-              <h2>Orçamento</h2>
-              <p><strong>Número:</strong> ${escapeHtml(budget.budget_number)}</p>
-              <p><strong>Emissão:</strong> ${formatDate(budget.issue_date)}</p>
-              <p><strong>Validade:</strong> ${formatDate(budget.valid_until)}</p>
-              <p><strong>Status:</strong> ${
-                budget.status === "finalized" ? "Finalizado" : "Rascunho"
-              }</p>
+            <div class="field">
+              <strong>Empresa</strong>
+              <span>${escapeHtml(budget.client_company || "-")}</span>
             </div>
-          </header>
 
-          <section class="section">
-            <h3 class="section-title">Cliente</h3>
-            <div class="grid">
-              <div class="card">
-                <p><strong>Nome:</strong> ${escapeHtml(budget.client_name)}</p>
-                <p><strong>E-mail:</strong> ${escapeHtml(budget.client_email || "-")}</p>
-                <p><strong>Telefone:</strong> ${escapeHtml(budget.client_phone || "-")}</p>
-                <p><strong>Empresa:</strong> ${escapeHtml(budget.client_company || "-")}</p>
-              </div>
-
-              <div class="card">
-                <p><strong>Prazo de entrega:</strong> ${escapeHtml(budget.delivery_time || "-")}</p>
-                <p><strong>Forma de pagamento:</strong> ${escapeHtml(budget.payment_terms || "-")}</p>
-                <p><strong>Observação rápida:</strong> ${
-                  budget.notes ? escapeHtml(budget.notes).slice(0, 80) : "-"
-                }</p>
-              </div>
+            <div class="field">
+              <strong>E-mail</strong>
+              <span>${escapeHtml(budget.client_email || "-")}</span>
             </div>
-          </section>
 
-          <section class="section">
-            <h3 class="section-title">Itens do orçamento</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Serviço</th>
-                  <th class="text-center">Qtd</th>
-                  <th class="text-right">Valor unitário</th>
-                  <th class="text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsRows}
-              </tbody>
-            </table>
-
-            <div class="summary">
-              <div class="summary-row">
-                <span>Subtotal</span>
-                <span>${formatCurrency(budget.subtotal)}</span>
-              </div>
-              <div class="summary-row">
-                <span>Desconto</span>
-                <span>${formatCurrency(budget.discount)}</span>
-              </div>
-              <div class="summary-row total">
-                <span>Total</span>
-                <span>${formatCurrency(budget.total)}</span>
-              </div>
+            <div class="field">
+              <strong>Telefone</strong>
+              <span>${escapeHtml(budget.client_phone || "-")}</span>
             </div>
-          </section>
+          </div>
+        </div>
 
-          <section class="section">
-            <h3 class="section-title">Observações</h3>
-            <div class="card">
-              <div class="notes">${escapeHtml(
-                budget.notes || "Nenhuma observação informada."
-              )}</div>
+        <div class="section">
+          <h3 class="section-title">Informações do orçamento</h3>
+          <div class="grid">
+            <div class="field">
+              <strong>Validade</strong>
+              <span>${formatDate(budget.valid_until)}</span>
             </div>
-          </section>
 
-          <footer class="footer">
-            Documento gerado automaticamente pelo BudgetFast • orçamento profissional em PDF
-          </footer>
+            <div class="field">
+              <strong>Prazo de entrega</strong>
+              <span>${escapeHtml(budget.delivery_time || "-")}</span>
+            </div>
+
+            <div class="field">
+              <strong>Forma de pagamento</strong>
+              <span>${escapeHtml(budget.payment_terms || "-")}</span>
+            </div>
+
+            <div class="field">
+              <strong>Status</strong>
+              <span>${escapeHtml(budget.status || "-")}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 class="section-title">Itens</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Serviço</th>
+                <th>Descrição</th>
+                <th>Qtd.</th>
+                <th>Valor unitário</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsRows}
+            </tbody>
+          </table>
+
+          <div class="totals">
+            <div class="totals-row">
+              <span>Subtotal</span>
+              <span>${formatCurrency(budget.subtotal)}</span>
+            </div>
+
+            <div class="totals-row">
+              <span>Desconto</span>
+              <span>${formatCurrency(budget.discount)}</span>
+            </div>
+
+            <div class="totals-row total">
+              <span>Total</span>
+              <span>${formatCurrency(budget.total)}</span>
+            </div>
+          </div>
+        </div>
+
+        ${
+          budget.notes
+            ? `
+              <div class="section">
+                <h3 class="section-title">Observações</h3>
+                <div class="notes">
+                  ${escapeHtml(budget.notes)}
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        <div class="footer">
+          Documento gerado pelo OrçaPro
         </div>
       </body>
     </html>
   `;
 }
 
-export async function generateBudgetPdf(profile, budget) {
+export async function generateBudgetPdf(payload) {
   const browser = await puppeteer.launch({
     headless: true,
   });
 
   try {
     const page = await browser.newPage();
-    const html = buildBudgetPdfHtml(profile, budget);
+    const html = buildBudgetHtml(payload);
 
     await page.setContent(html, {
       waitUntil: "networkidle0",

@@ -80,7 +80,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-[#f3f4f6] text-slate-900">
+    <div className="min-h-screen bg-[#f3f4f6] text-slate-900">
       <aside
         className="fixed left-0 top-0 z-40 flex h-screen flex-col bg-linear-to-b from-[#f66504] to-[#ff7a1a]"
         style={{ width: `${SIDEBAR_WIDTH}px` }}
@@ -89,38 +89,44 @@ export default function AppLayout() {
           <LogoOrcaPro />
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-5">
-          <nav className="space-y-2">
-            <SideLink
-              to="/dashboard"
-              icon={LayoutDashboard}
-              active={location.pathname === "/dashboard"}
-            >
-              Dashboard
-            </SideLink>
+        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+          <SideLink
+            to="dashboard"
+            icon={LayoutDashboard}
+            active={location.pathname === "/dashboard"}
+          >
+            Dashboard
+          </SideLink>
 
-            <SideLink
-              to="/orcamentos"
-              icon={FileText}
-              active={location.pathname.startsWith("/orcamentos")}
-            >
-              Orçamentos
-            </SideLink>
+          <SideLink
+            to="/orcamentos"
+            icon={FileText}
+            active={location.pathname.startsWith("/orcamentos")}
+          >
+            Orçamentos
+          </SideLink>
 
-            <SideLink
-              to="/perfil"
-              icon={UserCircle}
-              active={location.pathname === "/perfil"}
-            >
-              Perfil
-            </SideLink>
-          </nav>
-        </div>
+          <SideLink
+            to="/perfil"
+            icon={Briefcase}
+            active={location.pathname === "/perfil"}
+          >
+            Meu negócio 
+          </SideLink>
 
-        <div className="border-t border-white/10 p-4">
+          {/* <SideLink
+            to="/app/account"
+            icon={UserCircle}
+            active={location.pathname === "/app/account"}
+          >
+            Conta
+          </SideLink> */}
+        </nav>
+
+        <div className="border-t border-white/20 p-4">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition-all duration-200 hover:bg-white/10 hover:text-white"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
           >
             <LogOut size={18} />
             <span>Sair</span>
@@ -128,49 +134,57 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      <header
-        className="fixed top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-8"
-        style={{
-          left: `${SIDEBAR_WIDTH}px`,
-          right: 0,
-          height: `${HEADER_HEIGHT}px`,
-        }}
-      >
-        <div />
-
-        <div className="flex items-center gap-4">
-          <button className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200">
-            <Bell size={18} />
-          </button>
-
-          <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
-            <img
-              src="https://ui-avatars.com/api/?name=Felipe&background=f66504&color=fff"
-              alt="Usuário"
-              className="h-10 w-10 rounded-full object-cover"
-            />
-
-            <div className="hidden sm:block">
-              <p className="text-xs text-slate-500">Usuário logado</p>
-              <p className="max-w-55 truncate text-sm font-semibold text-slate-900">
-                {user?.email || "Felipe"}
-              </p>
-            </div>
-
-            <ChevronDown size={16} className="text-slate-500" />
-          </div>
-        </div>
-      </header>
-
       <div
-        className="h-screen overflow-hidden"
-        style={{
-          marginLeft: `${SIDEBAR_WIDTH}px`,
-          paddingTop: `${HEADER_HEIGHT}px`,
-        }}
+        className="min-h-screen"
+        style={{ marginLeft: `${SIDEBAR_WIDTH}px` }}
       >
-        <main className="h-full overflow-y-auto overflow-x-hidden p-8">
-          <div className="min-h-full rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+        <header
+          className="fixed top-0 right-0 z-30 flex items-center justify-between border-b border-slate-200 bg-[#f3f4f6]/95 px-8 backdrop-blur"
+          style={{
+            left: `${SIDEBAR_WIDTH}px`,
+            height: `${HEADER_HEIGHT}px`,
+          }}
+        >
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              Painel do OrçaPro
+            </h1>
+            <p className="text-sm text-slate-500">
+              Gerencie orçamentos com agilidade e profissionalismo.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button className="rounded-full border border-slate-200 bg-white p-3 text-slate-500 transition hover:bg-slate-100">
+              <Bell size={18} />
+            </button>
+
+            <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  user?.email || "Usuario"
+                )}&background=f66504&color=fff`}
+                alt="Usuário"
+                className="h-10 w-10 rounded-full object-cover"
+              />
+
+              <div className="hidden sm:block">
+                <p className="text-xs text-slate-500">Usuário logado</p>
+                <p className="max-w-55 truncate text-sm font-semibold text-slate-900">
+                  {user?.email || "Usuário"}
+                </p>
+              </div>
+
+              <ChevronDown size={16} className="text-slate-500" />
+            </div>
+          </div>
+        </header>
+
+        <main
+          className="min-h-screen px-8 pb-8"
+          style={{ paddingTop: `${HEADER_HEIGHT + 32}px` }}
+        >
+          <div className="min-h-[calc(100vh-124px)] rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
             <Outlet />
           </div>
         </main>

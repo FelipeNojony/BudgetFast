@@ -1,86 +1,138 @@
-import {
-  getProfileByUserId,
-  createProfile,
-  updateProfileByUserId,
-} from "../services/profileService.js";
+import { supabaseAdmin } from "../lib/supabase.js";
 
 export async function getProfile(request, reply) {
   try {
-    const userId = request.user.id;
+    const userId = request.user?.id;
 
-    const profile = await getProfileByUserId(userId);
+    if (!userId) {
+      return reply.status(401).send({
+        message: "Usuário não autenticado.",
+      });
+    }
 
-    return reply.send(profile ?? null);
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return reply.send(data || null);
   } catch (error) {
+    console.error("Erro ao buscar perfil:", error);
+
     return reply.status(500).send({
       message: "Erro ao buscar perfil.",
-      error: error.message,
     });
   }
 }
 
-export async function createProfileHandler(request, reply) {
+export async function createProfile(request, reply) {
   try {
-    const userId = request.user.id;
-    const { full_name, business_name, email, phone, primary_color } =
-      request.body;
+    const userId = request.user?.id;
 
-    const existingProfile = await getProfileByUserId(userId);
+    if (!userId) {
+      return reply.status(401).send({
+        message: "Usuário não autenticado.",
+      });
+    }
+
+    const {
+      full_name,
+      business_name,
+      email,
+      phone,
+      primary_color,
+    } = request.body;
+
+    const { data: existingProfile, error: existingProfileError } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existingProfileError) {
+      throw existingProfileError;
+    }
 
     if (existingProfile) {
-      return reply.status(400).send({
+      return reply.status(409).send({
         message: "Perfil já existe para este usuário.",
       });
     }
 
-    const profile = await createProfile({
-      user_id: userId,
-      full_name,
-      business_name,
-      email,
-      phone,
-      primary_color,
-    });
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        user_id: userId,
+        full_name,
+        business_name,
+        email,
+        phone,
+        primary_color: primary_color || "#0f172a",
+      })
+      .select()
+      .single();
 
-    return reply.status(201).send(profile);
+    if (error) {
+      throw error;
+    }
+
+    return reply.status(201).send(data);
   } catch (error) {
+    console.error("Erro ao criar perfil:", error);
+
     return reply.status(500).send({
       message: "Erro ao criar perfil.",
-      error: error.message,
     });
   }
 }
 
-export async function updateProfileHandler(request, reply) {
+export async function updateProfile(request, reply) {
   try {
-    const userId = request.user.id;
-    const { full_name, business_name, email, phone, primary_color } =
-      request.body;
+    const userId = request.user?.id;
 
-    console.log("Atualizando perfil do usuário:", userId);
-    console.log("Dados recebidos:", {
+    if (!userId) {
+      return reply.status(401).send({
+        message: "Usuário não autenticado.",
+      });
+    }
+
+    const {
       full_name,
       business_name,
       email,
       phone,
       primary_color,
-    });
+    } = request.body;
 
-    const profile = await updateProfileByUserId(userId, {
-      full_name,
-      business_name,
-      email,
-      phone,
-      primary_color,
-    });
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        full_name,
+        business_name,
+        email,
+        phone,
+        primary_color: primary_color || "#0f172a",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId)
+      .select()
+      .single();
 
-    return reply.send(profile);
+    if (error) {
+      throw error;
+    }
+
+    return reply.send(data);
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
 
     return reply.status(500).send({
       message: "Erro ao atualizar perfil.",
-      error: error.message,
     });
   }
 }

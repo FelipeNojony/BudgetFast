@@ -1,80 +1,107 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createBudget } from "../services/budgets";
-import { formatCurrency,
+import {
+  formatCurrency,
   formatCurrencyInput,
   formatPhone,
-  parseCurrencyInput,} from "../../utils/formatters";
+  parseCurrencyInput,
+} from "../../utils/formatters";
 
 const initialItem = {
   title: "",
   description: "",
   quantity: 1,
-  unit_price: 0,
+  unit_price_input: "",
+};
+
+const initialFormData = {
+  client_name: "",
+  client_email: "",
+  client_phone: "",
+  client_company: "",
+  issue_date: new Date().toISOString().split("T")[0],
+  valid_until: "",
+  delivery_time: "",
+  payment_terms: "",
+  notes: "",
+  discount: 0,
+  status: "draft",
 };
 
 export default function NewBudgetPage() {
-  const [formData, setFormData] = useState({
-    client_name: "",
-    client_email: "",
-    client_phone: "",
-    client_company: "",
-    issue_date: new Date().toISOString().split("T")[0],
-    valid_until: "",
-    delivery_time: "",
-    payment_terms: "",
-    notes: "",
-    discount: 0,
-    status: "draft",
-  });
-
+  const [formData, setFormData] = useState(initialFormData);
   const [items, setItems] = useState([{ ...initialItem }]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   function handleFormChange(event) {
-  const { name, value } = event.target;
+    const { name, value } = event.target;
 
-  setFormData((prevState) => {
-    if (name === "client_phone") {
+    setFormData((prevState) => {
+      if (name === "client_phone") {
+        return {
+          ...prevState,
+          [name]: formatPhone(value),
+        };
+      }
+
+      if (name === "discount") {
+        return {
+          ...prevState,
+          [name]: parseCurrencyInput(value),
+        };
+      }
+
       return {
         ...prevState,
-        [name]: formatPhone(value),
+        [name]: value,
       };
-    }
-
-    if (name === "discount") {
-      return {
-        ...prevState,
-        [name]: parseCurrencyInput(value),
-      };
-    }
-
-    return {
-      ...prevState,
-      [name]: value,
-    };
-  });
-}
+    });
+  }
 
   function handleItemChange(index, field, value) {
-  setItems((prevItems) =>
-    prevItems.map((item, itemIndex) =>
-      itemIndex === index
-        ? {
+    setItems((prevItems) =>
+      prevItems.map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+
+        if (field === "quantity") {
+          return {
             ...item,
-            [field]:
-              field === "quantity"
-                ? Number(value)
-                : field === "unit_price"
-                ? parseCurrencyInput(value)
-                : value,
-          }
-        : item
-    )
-  );
-}
+            quantity: value,
+          };
+        }
+
+        if (field === "unit_price_input") {
+          return {
+            ...item,
+            unit_price_input: value,
+          };
+        }
+
+        return {
+          ...item,
+          [field]: value,
+        };
+      })
+    );
+  }
+
+  function handleUnitPriceBlur(index) {
+    setItems((prevItems) =>
+      prevItems.map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+
+        const parsedValue = parseCurrencyInput(item.unit_price_input || "");
+
+        return {
+          ...item,
+          unit_price_input: parsedValue ? formatCurrencyInput(parsedValue) : "",
+        };
+      })
+    );
+  }
 
   function addItem() {
     setItems((prevItems) => [...prevItems, { ...initialItem }]);
@@ -90,10 +117,13 @@ export default function NewBudgetPage() {
   const calculatedItems = useMemo(() => {
     return items.map((item) => {
       const quantity = Number(item.quantity) || 0;
-      const unitPrice = Number(item.unit_price) || 0;
+      const unitPrice = parseCurrencyInput(item.unit_price_input || "");
 
       return {
-        ...item,
+        title: item.title,
+        description: item.description,
+        quantity,
+        unit_price: unitPrice,
         total_price: quantity * unitPrice,
       };
     });
@@ -117,25 +147,24 @@ export default function NewBudgetPage() {
     try {
       await createBudget({
         ...formData,
+        subtotal,
+        total,
         discount: Number(formData.discount) || 0,
-        items,
+        items: calculatedItems.map((item) => ({
+          title: item.title,
+          description: item.description,
+          quantity: Number(item.quantity) || 0,
+          unit_price: Number(item.unit_price) || 0,
+          total_price: Number(item.total_price) || 0,
+        })),
       });
 
       setMessage("Orçamento criado com sucesso.");
       toast.success("Orçamento criado com sucesso!");
 
       setFormData({
-        client_name: "",
-        client_email: "",
-        client_phone: "",
-        client_company: "",
+        ...initialFormData,
         issue_date: new Date().toISOString().split("T")[0],
-        valid_until: "",
-        delivery_time: "",
-        payment_terms: "",
-        notes: "",
-        discount: 0,
-        status: "draft",
       });
 
       setItems([{ ...initialItem }]);
@@ -299,11 +328,10 @@ export default function NewBudgetPage() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  step="0.01"
                   name="discount"
                   value={formatCurrencyInput(formData.discount)}
                   onChange={handleFormChange}
-                  placeholder="0.00"
+                  placeholder="0,00"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -399,6 +427,7 @@ export default function NewBudgetPage() {
                       <input
                         type="number"
                         step="0.01"
+                        min="0"
                         value={item.quantity}
                         onChange={(event) =>
                           handleItemChange(index, "quantity", event.target.value)
@@ -414,11 +443,12 @@ export default function NewBudgetPage() {
                       <input
                         type="text"
                         inputMode="numeric"
-                        step="0.01"
-                        value={formatCurrencyInput(item.unit_price)}    
+                        value={item.unit_price_input}
                         onChange={(event) =>
-                          handleItemChange(index, "unit_price", event.target.value)
+                          handleItemChange(index, "unit_price_input", event.target.value)
                         }
+                        onBlur={() => handleUnitPriceBlur(index)}
+                        placeholder="Ex: 3000,00"
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                       />
                     </div>
@@ -475,7 +505,6 @@ export default function NewBudgetPage() {
                 <span>{formatCurrency(total)}</span>
               </div>
             </div>
-
 
             {errorMessage && (
               <p className="mt-4 text-sm text-red-600">{errorMessage}</p>

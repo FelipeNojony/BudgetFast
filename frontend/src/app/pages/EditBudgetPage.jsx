@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import PageLoader from "../components/ui/PageLoader";
 import { getBudgetById, updateBudget } from "../services/budgets";
 import {
   formatCurrency,
@@ -14,116 +13,100 @@ const initialItem = {
   title: "",
   description: "",
   quantity: 1,
-  unit_price: 0,
+  unit_price_input: "",
 };
 
+const initialFormData = {
+  client_name: "",
+  client_email: "",
+  client_phone: "",
+  client_company: "",
+  issue_date: new Date().toISOString().split("T")[0],
+  valid_until: "",
+  delivery_time: "",
+  payment_terms: "",
+  notes: "",
+  discount: 0,
+  status: "draft",
+};
 
 export default function EditBudgetPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    client_name: "",
-    client_email: "",
-    client_phone: "",
-    client_company: "",
-    issue_date: "",
-    valid_until: "",
-    delivery_time: "",
-    payment_terms: "",
-    notes: "",
-    discount: 0,
-    status: "draft",
-  });
-
+  const [formData, setFormData] = useState(initialFormData);
   const [items, setItems] = useState([{ ...initialItem }]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    async function loadBudget() {
-      try {
-        const data = await getBudgetById(id);
-
-        setFormData({
-          client_name: data.client_name || "",
-          client_email: data.client_email || "",
-          client_phone: data.client_phone || "",
-          client_company: data.client_company || "",
-          issue_date: data.issue_date || "",
-          valid_until: data.valid_until || "",
-          delivery_time: data.delivery_time || "",
-          payment_terms: data.payment_terms || "",
-          notes: data.notes || "",
-          discount: Number(data.discount) || 0,
-          status: data.status || "draft",
-        });
-
-        setItems(
-          data.items?.length
-            ? data.items.map((item) => ({
-                title: item.title || "",
-                description: item.description || "",
-                quantity: Number(item.quantity) || 1,
-                unit_price: Number(item.unit_price) || 0,
-              }))
-            : [{ ...initialItem }]
-        );
-      } catch (error) {
-        setErrorMessage(error.message);
-        toast.error("Não foi possível carregar o orçamento.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadBudget();
-  }, [id]);
-
   function handleFormChange(event) {
-  const { name, value } = event.target;
+    const { name, value } = event.target;
 
-  setFormData((prevState) => {
-    if (name === "client_phone") {
+    setFormData((prevState) => {
+      if (name === "client_phone") {
+        return {
+          ...prevState,
+          [name]: formatPhone(value),
+        };
+      }
+
+      if (name === "discount") {
+        return {
+          ...prevState,
+          [name]: parseCurrencyInput(value),
+        };
+      }
+
       return {
         ...prevState,
-        [name]: formatPhone(value),
+        [name]: value,
       };
-    }
-
-    if (name === "discount") {
-      return {
-        ...prevState,
-        [name]: parseCurrencyInput(value),
-      };
-    }
-
-    return {
-      ...prevState,
-      [name]: value,
-    };
-  });
-}
+    });
+  }
 
   function handleItemChange(index, field, value) {
-  setItems((prevItems) =>
-    prevItems.map((item, itemIndex) =>
-      itemIndex === index
-        ? {
+    setItems((prevItems) =>
+      prevItems.map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+
+        if (field === "quantity") {
+          return {
             ...item,
-            [field]:
-              field === "quantity"
-                ? Number(value)
-                : field === "unit_price"
-                ? parseCurrencyInput(value)
-                : value,
-          }
-        : item
-    )
-  );
-}
+            quantity: value,
+          };
+        }
+
+        if (field === "unit_price_input") {
+          return {
+            ...item,
+            unit_price_input: value,
+          };
+        }
+
+        return {
+          ...item,
+          [field]: value,
+        };
+      })
+    );
+  }
+
+  function handleUnitPriceBlur(index) {
+    setItems((prevItems) =>
+      prevItems.map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+
+        const parsedValue = parseCurrencyInput(item.unit_price_input || "");
+
+        return {
+          ...item,
+          unit_price_input: parsedValue ? formatCurrencyInput(parsedValue) : "",
+        };
+      })
+    );
+  }
 
   function addItem() {
     setItems((prevItems) => [...prevItems, { ...initialItem }]);
@@ -139,10 +122,13 @@ export default function EditBudgetPage() {
   const calculatedItems = useMemo(() => {
     return items.map((item) => {
       const quantity = Number(item.quantity) || 0;
-      const unitPrice = Number(item.unit_price) || 0;
+      const unitPrice = parseCurrencyInput(item.unit_price_input || "");
 
       return {
-        ...item,
+        title: item.title,
+        description: item.description,
+        quantity,
+        unit_price: unitPrice,
         total_price: quantity * unitPrice,
       };
     });
@@ -157,6 +143,53 @@ export default function EditBudgetPage() {
     return Math.max(subtotal - discount, 0);
   }, [subtotal, formData.discount]);
 
+  useEffect(() => {
+    async function loadBudget() {
+      try {
+        setLoading(true);
+        setErrorMessage("");
+
+        const budget = await getBudgetById(id);
+
+        setFormData({
+          client_name: budget.client_name || "",
+          client_email: budget.client_email || "",
+          client_phone: budget.client_phone || "",
+          client_company: budget.client_company || "",
+          issue_date: budget.issue_date || new Date().toISOString().split("T")[0],
+          valid_until: budget.valid_until || "",
+          delivery_time: budget.delivery_time || "",
+          payment_terms: budget.payment_terms || "",
+          notes: budget.notes || "",
+          discount: Number(budget.discount) || 0,
+          status: budget.status || "draft",
+        });
+
+        if (Array.isArray(budget.items) && budget.items.length > 0) {
+          setItems(
+            budget.items.map((item) => ({
+              title: item.title || "",
+              description: item.description || "",
+              quantity: item.quantity ?? 1,
+              unit_price_input: item.unit_price
+                ? formatCurrencyInput(item.unit_price)
+                : "",
+            }))
+          );
+        } else {
+          setItems([{ ...initialItem }]);
+        }
+      } catch (error) {
+        setErrorMessage(error.message || "Erro ao carregar orçamento.");
+        toast.error("Erro ao carregar orçamento.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadBudget();
+  }, [id]);
+
   async function handleSubmit(event) {
     event.preventDefault();
     setSaving(true);
@@ -166,26 +199,37 @@ export default function EditBudgetPage() {
     try {
       await updateBudget(id, {
         ...formData,
+        subtotal,
+        total,
         discount: Number(formData.discount) || 0,
-        items,
+        items: calculatedItems.map((item) => ({
+          title: item.title,
+          description: item.description,
+          quantity: Number(item.quantity) || 0,
+          unit_price: Number(item.unit_price) || 0,
+          total_price: Number(item.total_price) || 0,
+        })),
       });
 
       setMessage("Orçamento atualizado com sucesso.");
-      toast.success("Orçamento atualizado com sucesso.");
-
-      setTimeout(() => {
-        navigate(`/orcamentos/${id}`);
-      }, 1000);
+      toast.success("Orçamento atualizado com sucesso!");
+      navigate("/orcamentos");
     } catch (error) {
-      setErrorMessage(error.message);
-      toast.error("Não foi possível atualizar o orçamento.");
+      setErrorMessage(error.message || "Erro ao atualizar orçamento.");
+      toast.error("Erro ao atualizar orçamento.");
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <PageLoader message="Carregando orçamento..." />;
+    return (
+      <section className="text-slate-900">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+          <p className="text-slate-600">Carregando orçamento...</p>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -200,8 +244,8 @@ export default function EditBudgetPage() {
         </h1>
 
         <p className="mt-3 max-w-2xl text-slate-600">
-          Atualize os dados do cliente, ajuste os itens e revise os totais antes
-          de salvar as alterações.
+          Atualize os dados do cliente, ajuste os itens e revise o resumo antes
+          de salvar.
         </p>
       </div>
 
@@ -222,6 +266,7 @@ export default function EditBudgetPage() {
                   name="client_name"
                   value={formData.client_name}
                   onChange={handleFormChange}
+                  placeholder="Nome do cliente"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                   required
                 />
@@ -236,6 +281,7 @@ export default function EditBudgetPage() {
                   name="client_email"
                   value={formData.client_email}
                   onChange={handleFormChange}
+                  placeholder="cliente@email.com"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -249,6 +295,7 @@ export default function EditBudgetPage() {
                   name="client_phone"
                   value={formData.client_phone}
                   onChange={handleFormChange}
+                  placeholder="(11) 99999-9999"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -262,6 +309,7 @@ export default function EditBudgetPage() {
                   name="client_company"
                   value={formData.client_company}
                   onChange={handleFormChange}
+                  placeholder="Empresa do cliente"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -310,6 +358,7 @@ export default function EditBudgetPage() {
                   name="delivery_time"
                   value={formData.delivery_time}
                   onChange={handleFormChange}
+                  placeholder="Ex: 7 dias úteis"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -323,6 +372,7 @@ export default function EditBudgetPage() {
                   name="payment_terms"
                   value={formData.payment_terms}
                   onChange={handleFormChange}
+                  placeholder="Ex: 50% entrada e 50% entrega"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -334,10 +384,10 @@ export default function EditBudgetPage() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  step="0.01"
                   name="discount"
                   value={formatCurrencyInput(formData.discount)}
                   onChange={handleFormChange}
+                  placeholder="0,00"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -366,6 +416,7 @@ export default function EditBudgetPage() {
                   value={formData.notes}
                   onChange={handleFormChange}
                   rows="4"
+                  placeholder="Informações adicionais"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                 />
               </div>
@@ -404,6 +455,7 @@ export default function EditBudgetPage() {
                         onChange={(event) =>
                           handleItemChange(index, "title", event.target.value)
                         }
+                        placeholder="Ex: Criação de landing page"
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                         required
                       />
@@ -419,6 +471,7 @@ export default function EditBudgetPage() {
                           handleItemChange(index, "description", event.target.value)
                         }
                         rows="3"
+                        placeholder="Detalhes do serviço"
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                       />
                     </div>
@@ -430,6 +483,7 @@ export default function EditBudgetPage() {
                       <input
                         type="number"
                         step="0.01"
+                        min="0"
                         value={item.quantity}
                         onChange={(event) =>
                           handleItemChange(index, "quantity", event.target.value)
@@ -445,11 +499,12 @@ export default function EditBudgetPage() {
                       <input
                         type="text"
                         inputMode="numeric"
-                        step="0.01"
-                        value={formatCurrencyInput(formData.discount)}
+                        value={item.unit_price_input}
                         onChange={(event) =>
-                          handleItemChange(index, "unit_price", event.target.value)
+                          handleItemChange(index, "unit_price_input", event.target.value)
                         }
+                        onBlur={() => handleUnitPriceBlur(index)}
+                        placeholder="Ex: 3000,00"
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-all duration-200 focus:border-[#f66504] focus:ring-4 focus:ring-[#ffd6bf]"
                       />
                     </div>
@@ -466,7 +521,8 @@ export default function EditBudgetPage() {
                     <button
                       type="button"
                       onClick={() => removeItem(index)}
-                      className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-100"
+                      className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-100 disabled:opacity-50"
+                      disabled={items.length === 1}
                     >
                       Remover
                     </button>
@@ -504,22 +560,6 @@ export default function EditBudgetPage() {
                 <span>Total</span>
                 <span>{formatCurrency(total)}</span>
               </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                Status atual
-              </p>
-
-              <span
-                className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                  formData.status === "finalized"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-700"
-                }`}
-              >
-                {formData.status === "finalized" ? "Finalizado" : "Rascunho"}
-              </span>
             </div>
 
             {errorMessage && (

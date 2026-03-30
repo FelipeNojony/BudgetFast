@@ -1,5 +1,27 @@
 import { supabaseAdmin } from "../lib/supabase.js";
 
+function normalizeNumber(value) {
+  const number = Number(value);
+  return Number.isNaN(number) ? 0 : number;
+}
+
+function buildItemsPayload(items, budgetId) {
+  return items.map((item) => {
+    const quantity = normalizeNumber(item.quantity);
+    const unit_price = normalizeNumber(item.unit_price);
+    const total_price = normalizeNumber(item.total_price || quantity * unit_price);
+
+    return {
+      budget_id: budgetId,
+      title: item.title,
+      description: item.description,
+      quantity,
+      unit_price,
+      total_price,
+    };
+  });
+}
+
 export async function getBudgetsByUserId(userId) {
   const { data, error } = await supabaseAdmin
     .from("budgets")
@@ -53,14 +75,7 @@ export async function createBudgetWithItems(budgetData, items) {
     throw budgetError;
   }
 
-  const itemsPayload = items.map((item) => ({
-    budget_id: budget.id,
-    title: item.title,
-    description: item.description,
-    quantity: item.quantity,
-    unit_price: item.unit_price,
-    total_price: item.total_price,
-  }));
+  const itemsPayload = buildItemsPayload(items, budget.id);
 
   const { data: insertedItems, error: itemsError } = await supabaseAdmin
     .from("budget_items")
@@ -113,14 +128,7 @@ export async function updateBudgetWithItems(budgetId, userId, budgetData, items)
     throw deleteItemsError;
   }
 
-  const itemsPayload = items.map((item) => ({
-    budget_id: budgetId,
-    title: item.title,
-    description: item.description,
-    quantity: item.quantity,
-    unit_price: item.unit_price,
-    total_price: item.total_price,
-  }));
+  const itemsPayload = buildItemsPayload(items, budgetId);
 
   const { data: insertedItems, error: insertItemsError } = await supabaseAdmin
     .from("budget_items")

@@ -11,7 +11,7 @@ export async function getProfileByUserId(userId) {
     throw error;
   }
 
-  return data;
+  return data || null;
 }
 
 export async function createProfile(profileData) {
